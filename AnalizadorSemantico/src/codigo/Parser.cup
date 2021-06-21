@@ -1,0 +1,309 @@
+package codigo;
+import  java_cup.runtime.*;
+import java.util.LinkedList;
+
+/*Parser code*/
+parser code
+{:
+    public LinkedList<ErrorMsg> errorList = new LinkedList<ErrorMsg>();
+    private Integer row, column;
+    private String tokenName;
+
+    public void syntax_error(Symbol s) 
+    {
+        String lexeme = s.value.toString();
+        int row =  s.right + 1;
+        int column = s.left + 1;
+        this.row = row;
+        this.column = column;
+        tokenName = lexeme;
+        System.out.println("Sintax error at: " + lexeme + " row: " + row + " column: " + column);
+        ErrorMsg error =  new ErrorMsg(lexeme, "Syntax error: " + s, row, column);
+        //errorList.add(error);
+    }
+
+    public void addSintaxError(String s, String msg) 
+    {
+        ErrorMsg error =  new ErrorMsg(tokenName, "Syntax error: " + msg, row, column);
+        errorList.add(error);
+    }
+
+    public void unrecovered_syntax_error(Symbol s)
+    {        
+        String lexeme = s.value.toString();
+        tokenName = lexeme;
+        int row = s.right + 1;
+        int column = s.left + 1;
+        this.row = row;
+        this.column = column;
+        System.out.println("Unrecovered Sintax error: " + lexeme + " row: " + row + " column: " + column);
+        ErrorMsg error =  new ErrorMsg(lexeme, "Syntax error: " + s, row, column);
+        //errorList.add(error);
+    }
+:}
+
+
+/*Synmbol Terminal and No-terminal*/
+/*TERMINALS*/
+terminal String INCR, DECR, EQUAL, ADD, SUB, MUL, DIV, MOD;
+terminal String OPEN_BRACKET, CLOSE_BRACKET, ADD_EQUAL, SUB_EQUAL, MUL_EQUAL, DIV_EQUAL, OPEN_KEY, CLOSE_KEY;
+terminal String EQUAL_TO, GREATER_EQUAL, LESS, LESS_EQUAL, GREATER, NOT_EQUAL, LOGICAL_OR, LOGICAL_AND, LOGICAL_NOT;
+terminal String LITERAL_STR, FLOAT_NUMBER, FLOAT_POINT_NUMBER,LITERAL_CHAR;
+terminal String OCTAL_NUMBER, NUMBER, HEXADECIMAL_NUMBER, BINARY_NUMBER;
+terminal String I_BREAK, I_CASE, I_CHAR, I_CONST, I_CONTINUE, I_DEFAULT, I_DO, I_ELSE, I_FOR, I_IF, I_INT, I_LONG;
+terminal String I_RETURN, I_SHORT, I_SWITCH, I_VOID, I_WHILE, I_READ, I_WRITE;
+terminal String SEMICOLON, COMMA, IDENTIFIER,COLON;
+
+/* NON TERMINALS */
+non terminal String program, decl_list, global_decl, const_decl, funct_decl, var_type, var_decl, functin_init;
+non terminal String literal, declaration, var_func_decl_list, stmts, var_func_decl, condition_list;
+non terminal String structs, struct_decl, struct_type, condition_for, condition, var, comparator, change_var,if,else;
+non terminal String switch_sent,mult_case_stmt, case_stmt, case_fin, return,if_sent,if_inst,else_inst, asign_equal,read_func,write_func;
+non terminal String equals, incr_decr, math_expr, expr_uni, expr_math, expr,symbol,case_default,cases_switch,stmts_switch,assigment_type,call_fun ,var_list;
+
+
+start with program;
+
+
+
+program ::= decl_list:dl
+    
+;
+decl_list ::= declaration:d decl_list:dl
+    | declaration:d | asign_equal:ae
+;
+declaration ::= global_decl:gl
+    | const_decl:cl 
+    | funct_decl:fl 
+    | error SEMICOLON:sm     {:addSintaxError(sm," Missing token ");:}
+    | error OPEN_KEY:ok      {:addSintaxError(ok," Unknown token { ");:}
+    | error CLOSE_KEY:ck     {:addSintaxError(ck," Missing token ");:}
+    | error OPEN_BRACKET:ob  {:addSintaxError(ob," Unknown token ( ");:}
+    | error CLOSE_BRACKET:cb {:addSintaxError(cb," Missing token ");:}
+    | error IDENTIFIER:i     {:addSintaxError(i," Missing token ");:}
+;
+global_decl ::= var_func_decl COMMA var_decl:vd SEMICOLON
+    | var_func_decl EQUAL assigment_type:at COMMA var_decl:vd SEMICOLON
+    | var_func_decl SEMICOLON
+    | var_func_decl EQUAL assigment_type:at SEMICOLON
+;
+var_type ::=  I_SHORT:i
+    | I_LONG:i
+    | I_INT:i
+    | I_CHAR:i MUL:m
+    | I_CHAR
+;
+var_decl   ::= IDENTIFIER:i EQUAL assigment_type:at
+    | IDENTIFIER:i
+    | IDENTIFIER:i EQUAL assigment_type:at COMMA var_decl:vd
+    | IDENTIFIER:i COMMA var_decl:vd
+  
+;
+assigment_type ::= LITERAL_STR:ls
+                | expr_math:em 
+                | literal:l
+;
+const_decl  ::= I_CONST var_type:vt var_decl:vd SEMICOLON
+          
+;
+funct_decl ::= functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb OPEN_KEY:ok stmts:s CLOSE_KEY:ck
+    | functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb OPEN_KEY:ok stmts:s CLOSE_KEY:ck
+    | functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb OPEN_KEY:ok CLOSE_KEY:ck
+    | functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb OPEN_KEY:ok CLOSE_KEY:ck
+    //| functin_init:fi OPEN_BRACKET:ob error CLOSE_BRACKET:cb OPEN_KEY:ok CLOSE_KEY:ck   {:addSintaxError(cb,"Function param invalid");:}
+    //| functin_init:fi OPEN_BRACKET:ob error OPEN_KEY:ok CLOSE_KEY:ck {:addSintaxError(ok," Missing token ");:}
+    //| functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb error stmts:s CLOSE_KEY:ck   {:addSintaxError(cb," Missing token ");:}
+    //| functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb error stmts:s CLOSE_KEY:ck   {:addSintaxError(ck," Missing token");:}
+;
+functin_init   ::= var_func_decl:cfd
+    | I_VOID:i IDENTIFIER:id
+;
+var_func_decl_list   ::= var_func_decl:vfd COMMA var_func_decl_list:vfdl
+    | var_func_decl:vfd
+;
+var_func_decl ::= var_type:vt IDENTIFIER:i               
+;
+stmts ::= const_decl stmts:s
+        | const_decl
+        | global_decl:gl stmts:s
+        | global_decl:gl
+        | structs:st stmts:sm
+        | structs:st 
+        | asign_equal:ae SEMICOLON:sc stmts:sm
+        | asign_equal:ae SEMICOLON:sc
+        | IDENTIFIER:i EQUAL assigment_type:at SEMICOLON stmts:sm
+        | IDENTIFIER:i EQUAL assigment_type:at SEMICOLON
+        | MUL:m IDENTIFIER:i EQUAL assigment_type:at SEMICOLON stmts:sm
+        | MUL:m IDENTIFIER:i EQUAL assigment_type:at SEMICOLON
+        | incr_decr SEMICOLON:sc stmts:sm
+        | incr_decr SEMICOLON:sc
+        | expr_math SEMICOLON:sc stmts:sm
+        | expr_math
+        | read_func:rf stmts:s
+        | read_func:rf
+        | write_func:wf stmts:s
+        | write_func:wf 
+        | call_fun:cf SEMICOLON:sc stmts:s
+        | call_fun:cf SEMICOLON:sc
+        | return:r stmts
+        | return:r
+        | case_fin:cf stmts
+        | case_fin:cf
+
+;   
+stmts_switch ::= structs:st stmts_switch:sw
+                | structs:st 
+                | asign_equal:ae SEMICOLON:sc stmts_switch:sw 
+                | asign_equal:ae SEMICOLON:sc
+                | IDENTIFIER:i EQUAL assigment_type:at SEMICOLON stmts_switch:sw
+                | IDENTIFIER:i EQUAL assigment_type:at SEMICOLON
+                | MUL:m IDENTIFIER:i EQUAL assigment_type:at SEMICOLON stmts_switch:sw
+                | MUL:m IDENTIFIER:i EQUAL assigment_type:at SEMICOLON
+                | incr_decr SEMICOLON:sc stmts_switch:sw
+                | incr_decr
+                | expr_math SEMICOLON:sc stmts_switch:sw
+                | expr_math
+                | read_func:rf stmts_switch:ss
+                | read_func:rf
+                | write_func:wf stmts_switch:ss
+                | write_func:wf
+                | call_fun:cf SEMICOLON:sc stmts_switch:sw  
+                | call_fun:cf SEMICOLON:sc
+                | return:r stmts_switch 
+                | return:r
+;
+
+call_fun ::= IDENTIFIER:i OPEN_BRACKET:ob CLOSE_BRACKET:cb 
+            | IDENTIFIER:i OPEN_BRACKET:ob var_list:vl CLOSE_BRACKET:cb 
+;
+
+read_func ::= I_READ:r OPEN_BRACKET:ob IDENTIFIER:i CLOSE_BRACKET:cb SEMICOLON:s
+    |   OPEN_BRACKET:ob CLOSE_BRACKET:cb SEMICOLON:s
+;
+
+write_func ::= I_WRITE:w OPEN_BRACKET:ob var_list:vl CLOSE_BRACKET:cb SEMICOLON:s
+;
+
+var_list ::=  assigment_type:at COMMA var_list:vl 
+           | assigment_type:at
+;
+        
+structs ::= struct_decl OPEN_KEY:ok stmts:s CLOSE_KEY:ck
+           |switch_sent:ss 
+           |if_sent:is
+;            
+struct_decl ::= struct_type:st OPEN_BRACKET:ob condition_list:c CLOSE_BRACKET:cb
+            | struct_type:st OPEN_BRACKET:ob condition_for:cf CLOSE_BRACKET:cb 
+;
+struct_type ::= I_FOR:f
+               |I_WHILE:w
+;
+if_sent ::= if_inst:is else_inst:es
+        |if_inst:is
+;
+if_inst ::= I_IF:i OPEN_BRACKET:ob condition_list:c CLOSE_BRACKET:cb OPEN_KEY:ok stmts:s CLOSE_KEY:ck 
+;
+else_inst ::= I_ELSE:i OPEN_KEY:ok stmts:s CLOSE_KEY:ck 
+;
+switch_sent ::= I_SWITCH:s OPEN_BRACKET:o var:v CLOSE_BRACKET:c OPEN_KEY:ok cases_switch:cs CLOSE_KEY:ck
+;
+cases_switch ::= mult_case_stmt:mc case_default:cd
+                |mult_case_stmt:mc
+;
+mult_case_stmt ::= case_stmt:cs mult_case_stmt:mcs 
+                   | case_stmt:cs 
+ 
+; 
+case_default ::= I_DEFAULT:d COLON:c stmts_switch:s case_fin:cf 
+            | I_DEFAULT:d COLON:c stmts_switch:s
+            | I_DEFAULT:d COLON:c stmts_switch:s case_fin:cf return:r
+
+;
+case_stmt ::= I_CASE:c NUMBER:n COLON stmts_switch:s case_fin:cf 
+            | I_CASE:c NUMBER:n COLON stmts_switch:s 
+            | I_CASE:c NUMBER:n COLON stmts_switch:s case_fin:cf return:r
+            | I_CASE:c NUMBER:n COLON case_fin:cf 
+            | I_CASE:c NUMBER:n COLON case_fin:cf return:r
+            | I_CASE:c NUMBER:n COLON 
+;
+case_fin ::= I_BREAK:b SEMICOLON | I_CONTINUE:c SEMICOLON                                                     
+;
+return ::= I_RETURN:r var:v SEMICOLON:s  
+        | I_RETURN:r SEMICOLON:s 
+;
+
+change_var ::= INCR:i
+            |DECR:d
+;
+condition_list ::= condition comparator condition_list 
+                |condition
+;
+condition ::=  var:v comparator:c var:v1
+            | OPEN_BRACKET var:v comparator:c var:v1 CLOSE_BRACKET
+            | OPEN_BRACKET var:v CLOSE_BRACKET
+
+;
+condition_for ::= var_type:vt var_decl:vd SEMICOLON:sc condition:c SEMICOLON:sc1 incr_decr
+;
+incr_decr ::= IDENTIFIER:i change_var:cv
+            | change_var:cv IDENTIFIER:i
+;
+comparator ::= EQUAL_TO:et 
+             |GREATER_EQUAL:ge
+             |LESS:l
+             |LESS_EQUAL:le
+             |GREATER:gr
+             |NOT_EQUAL:ne
+             |LOGICAL_AND
+             |LOGICAL_OR
+
+;
+var ::= NUMBER:n
+    | IDENTIFIER:i
+    |LOGICAL_NOT:ln IDENTIFIER:i
+;
+asign_equal ::= IDENTIFIER:i equals:e var
+;
+equals ::= ADD_EQUAL 
+    | SUB_EQUAL 
+    | MUL_EQUAL 
+    | DIV_EQUAL
+;
+
+
+
+
+
+expr_math ::= OPEN_BRACKET:o expr_math:em CLOSE_BRACKET:c expr_math:em1
+            | OPEN_BRACKET:o expr_math:em CLOSE_BRACKET:c
+            | literal:u expr_uni:eu
+            | expr_uni:eu
+;
+
+expr_uni ::= ADD:a literal:n expr_uni:eu
+    | ADD:a literal:n
+    | SUB:s literal:n expr_uni:eu
+    | SUB:s literal:n
+    | MUL:m literal:n expr_uni:eu
+    | MUL:m literal:n 
+    | DIV:d literal:n expr_uni:eu
+    | DIV:d literal:n
+    | MOD:d literal:n expr_uni:eu
+    | MOD:d literal:n 
+;
+
+symbol ::= ADD:a
+        |SUB:s
+        |MUL:m
+        |DIV:d
+        |MOD:d
+;
+
+literal ::= NUMBER:n
+    | IDENTIFIER:i
+    | OCTAL_NUMBER:n
+    | HEXADECIMAL_NUMBER:n
+    | BINARY_NUMBER:n
+    | call_fun:cf
+;
+
