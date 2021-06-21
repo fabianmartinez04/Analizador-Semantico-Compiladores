@@ -5,7 +5,7 @@
  */
 package codigo;
 
-import Estructuras.TablaSimbolos;
+import Estructuras.TablaSimbolosScanner;
 import Estructuras.Token;
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -29,7 +29,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class frmPrincipal extends javax.swing.JFrame {
 
-    TablaSimbolos tabla;
+    TablaSimbolosScanner tabla;
 
     /**
      * Creates new form frmPrincipal
@@ -37,7 +37,7 @@ public class frmPrincipal extends javax.swing.JFrame {
     public frmPrincipal() {
         initComponents();
         this.setLocationRelativeTo(null);
-        // tabla = new TablaSimbolos();
+        // tabla = new TablaSimbolosScanner();
     }
 
     /**
@@ -222,7 +222,7 @@ public class frmPrincipal extends javax.swing.JFrame {
             Lexer lexer = new Lexer(lector);
             Parser parser;
             Symbol s = new Symbol(SOMEBITS);
-            tabla = new TablaSimbolos();
+            tabla = new TablaSimbolosScanner();
             String error = "";
             while (true) {
                 TipoToken tokens = lexer.yylex();

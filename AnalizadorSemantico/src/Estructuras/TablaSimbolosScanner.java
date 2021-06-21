@@ -13,10 +13,12 @@ import java.util.Hashtable;
  *
  * @author liset
  */
-public class TablaSimbolos {
+
+public class TablaSimbolosScanner {
     Hashtable<String,Token> tabla;
     ArrayList<String> llaves ;
-    public TablaSimbolos() {
+    
+    public TablaSimbolosScanner() {
         this.tabla = new Hashtable<>();
         this.llaves = new ArrayList();
     }
