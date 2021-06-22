@@ -9,6 +9,7 @@ package Estructuras.SematicRegister;
  *
  * @author pablo
  */
-public class RS_TYPE extends RS{
-    String type;
+public class RS_IF extends RS{
+    String exit_label;
+    String else_label;
 }

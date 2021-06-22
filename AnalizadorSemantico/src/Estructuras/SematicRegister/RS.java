@@ -9,5 +9,7 @@ package Estructuras.SematicRegister;
  *
  * @author pablo
  */
-public abstract class RS {    
+public class RS {
+    public RS_TYPES id;
+    public String value;
 }

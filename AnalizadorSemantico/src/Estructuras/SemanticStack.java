@@ -29,14 +29,14 @@ public class SemanticStack {
   }
   
  // searching a register in entry list
- /*RS find() {
+ RS find(String p_id) {
      ListIterator<RS> iterator = this.stack.listIterator();
      RS r = null;
      while (iterator.hasNext()) {
          r = iterator.next();
-         if (r.name.equals())
-             return r;
+         if (r.id.equals(p_id))
+            return r;
      }
      return r;
- }*/
+ }
 }
