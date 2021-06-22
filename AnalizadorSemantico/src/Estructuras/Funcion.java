@@ -42,6 +42,20 @@ public class Funcion extends Estructura{
     public int getCantidadParametros() {
         return cantidadParametros;
     }
+    
+    public boolean searchVariable(String variable){
+        
+        for(int i = 0 ; i<this.cantidadParametros ; i++){
+            if(this.parametros.get(i).nombre.equals(variable))
+                return true;
+        }
+        
+        return false;
+        
+    }
+    
+    
+    
 
     public String imprimir(){
         String datos= super.imprimir()+ "\n"+

@@ -24,7 +24,7 @@ public class Principal {
       // ruta = "D:/Desktop/CI/Proyectos/Etapa 1/Analizador-Lexico-Compiladores/AnalizadorLexico/src/codigo/Lexer.flex";
        generar(ruta);
      /* Parametro uno = new Parametro("int", 1,"largo");
-      Parametro dos = new Parametro("String", 2, "tamano");
+      Parametro dos = new Parametro("String", 2, "hola");
       
       ArrayList<Parametro> parametros = new ArrayList<>();
       parametros.add(uno);
@@ -35,18 +35,19 @@ public class Principal {
       
       Estructura funcion = new Funcion("void","main",parametros,1);
       
-      Estructura variable = new Variable("void","cantidad",2,"funcion");
+      Estructura variable = new Variable("void","cantidad",2,"largo");
       
       TablaSimbolosSemantico tabla = new TablaSimbolosSemantico();
       
       
       tabla.addEstructura("main", funcion);
       tabla.addEstructura("cantidad", variable);
+      System.out.println(tabla.validateParametro("cantidad","main"));
       //System.err.println(funcion.imprimir());
       //  System.err.println(tabla.validateEstructura("dasdas"));
        // System.err.println(tabla.getBandera("main"));
-      //System.err.println(tabla.imprimirTablaSimbolos());
-      */
+    //  System.err.println(tabla.imprimirTablaSimbolos());*/
+      
       
       
     }

@@ -43,13 +43,45 @@ public class TablaSimbolosSemantico {
 
     }
     public boolean validateEstructura(String dato){
-        
+
         return this.llaves.contains(dato);
        
   
     }
     
-      public String imprimirTablaSimbolos(){
+    public Funcion getFuncion(String funcion){
+     
+        for(int i = 0 ; i<this.llaves.size();i++){
+           
+            if(this.tabla.get(this.llaves.get(i)).nombre.equals(funcion) && 
+                    this.tabla.get(this.llaves.get(i)).estructura.equals("funcion")){
+                return (Funcion) this.tabla.get(this.llaves.get(i));
+            }
+            
+        
+
+        }
+        return null;
+    }
+        
+
+    
+    public boolean validateParametro(String variable,String funcion){
+        
+        Funcion searchFuncion = getFuncion(funcion);
+        if(searchFuncion!= null){
+        
+            if(searchFuncion.searchVariable(variable))
+                return true;
+        }
+            
+        return false;
+
+    }
+                
+    
+    
+    public String imprimirTablaSimbolos(){
         String datos = " ";
         
         for(int i=0;i<tabla.size();i++){
