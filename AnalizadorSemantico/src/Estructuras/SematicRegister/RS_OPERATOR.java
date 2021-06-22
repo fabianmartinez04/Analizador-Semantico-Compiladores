@@ -9,6 +9,6 @@ package Estructuras.SematicRegister;
  *
  * @author pablo
  */
-public class RS_OPERATOR {
+public class RS_OPERATOR extends RS{
     String operator;
 }

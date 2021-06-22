@@ -9,7 +9,7 @@ package Estructuras.SematicRegister;
  *
  * @author pablo
  */
-public class RS_DO {
+public class RS_DO extends RS{
     String type;
     String value;
     String name;

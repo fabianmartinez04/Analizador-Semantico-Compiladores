@@ -4,9 +4,15 @@
  * and open the template in the editor.
  */
 package codigo;
-import Estructuras.TablaSimbolos;
+import Estructuras.Estructura;
+import Estructuras.Funcion;
+import Estructuras.Parametro;
+import Estructuras.TablaSimbolosScanner;
+import Estructuras.TablaSimbolosSemantico;
 import Estructuras.Token;
+import Estructuras.Variable;
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  *
@@ -17,6 +23,32 @@ public class Principal {
        String ruta = "C:/Users/liset/OneDrive/Documentos/Ingenieria en Computacion/Computacion V Semestre/Compiladores e interpretes/Proyectos/Parser/AnalizadorSintactico/src/codigo/Lexer.flex";
       // ruta = "D:/Desktop/CI/Proyectos/Etapa 1/Analizador-Lexico-Compiladores/AnalizadorLexico/src/codigo/Lexer.flex";
        generar(ruta);
+     /* Parametro uno = new Parametro("int", 1,"largo");
+      Parametro dos = new Parametro("String", 2, "tamano");
+      
+      ArrayList<Parametro> parametros = new ArrayList<>();
+      parametros.add(uno);
+      parametros.add(dos);
+      
+      
+      
+      
+      Estructura funcion = new Funcion("void","main",parametros,1);
+      
+      Estructura variable = new Variable("void","cantidad",2,"funcion");
+      
+      TablaSimbolosSemantico tabla = new TablaSimbolosSemantico();
+      
+      
+      tabla.addEstructura("main", funcion);
+      tabla.addEstructura("cantidad", variable);
+      //System.err.println(funcion.imprimir());
+      //  System.err.println(tabla.validateEstructura("dasdas"));
+       // System.err.println(tabla.getBandera("main"));
+      //System.err.println(tabla.imprimirTablaSimbolos());
+      */
+      
+      
     }
     
     public static void generar(String ruta){

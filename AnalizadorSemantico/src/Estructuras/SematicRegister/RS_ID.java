@@ -9,6 +9,6 @@ package Estructuras.SematicRegister;
  *
  * @author pablo
  */
-public class RS_ID {
+public class RS_ID extends RS{
     String name;
 }
