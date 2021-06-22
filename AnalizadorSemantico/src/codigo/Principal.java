@@ -47,8 +47,7 @@ public class Principal {
       //  System.err.println(tabla.validateEstructura("dasdas"));
        // System.err.println(tabla.getBandera("main"));
     //  System.err.println(tabla.imprimirTablaSimbolos());*/
-      
-      
+  
       
     }
     

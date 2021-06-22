@@ -9,7 +9,7 @@ package Estructuras.SematicRegister;
  *
  * @author pablo
  */
-public class RS_IF extends RS{
+public class RS_WHILE extends RS{
     public String exit_label;
-    public String else_label;
+    public String while_label;
 }

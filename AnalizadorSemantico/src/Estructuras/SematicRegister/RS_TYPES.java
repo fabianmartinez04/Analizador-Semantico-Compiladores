@@ -10,5 +10,6 @@ public enum RS_TYPES {
     TYPE,
     DO,
     IF,
-    WHILE
+    WHILE,
+    ERROR
 }

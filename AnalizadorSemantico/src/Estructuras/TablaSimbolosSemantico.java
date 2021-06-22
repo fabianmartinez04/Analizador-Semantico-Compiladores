@@ -70,7 +70,7 @@ public class TablaSimbolosSemantico {
         
         Funcion searchFuncion = getFuncion(funcion);
         if(searchFuncion!= null){
-        
+         
             if(searchFuncion.searchVariable(variable))
                 return true;
         }

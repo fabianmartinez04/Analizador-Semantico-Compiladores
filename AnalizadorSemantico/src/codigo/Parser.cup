@@ -1,6 +1,10 @@
 package codigo;
 import  java_cup.runtime.*;
 import java.util.LinkedList;
+import Estructuras.SemanticStack;
+import Estructuras.SematicRegister.*;
+import Estructuras.*;
+
 
 /*Parser code*/
 parser code
@@ -9,7 +13,9 @@ parser code
     private Integer row, column;
     private String tokenName;
 
-    public void syntax_error(Symbol s) 
+    
+    
+   public void syntax_error(Symbol s) 
     {
         String lexeme = s.value.toString();
         int row =  s.right + 1;
@@ -41,7 +47,173 @@ parser code
         //errorList.add(error);
     }
 :}
+action code
 
+{:
+    private TablaSimbolosSemantico table = new TablaSimbolosSemantico();
+    private SemanticStack stack = new SemanticStack();
+    public LinkedList<ErrorMsg> semanticList = new LinkedList<ErrorMsg>();
+    int count = 0;
+
+    public void addSemanticError(Symbol s, String msg) 
+    {
+        ErrorMsg error =  new ErrorMsg(s.value.toString(), "Semantic error: " + msg, s.right, s.left);
+        semanticList.add(error);
+    }
+
+    public void recuerdaConst(String type,String value){
+       
+        RS_DO register = new RS_DO();
+        register.type = type;
+        register.value = value;
+        register.id = RS_TYPES.DO;
+        stack.push(register);
+
+    }
+    
+    public void recuerdaVariable(String type,String name,Symbol s){
+    
+        RS_DO register = new RS_DO();
+        register.type = type;
+        register.name = name;
+        register.id = RS_TYPES.DO;
+        if(!(table.validateEstructura(name))){
+           addSemanticError(s,"la variable no se encuentra declarada");
+        }
+
+        stack.push(register);
+
+    }
+
+    public void recuerdaOperador(String value){
+       
+        RS register = new RS();
+        register.value = value;
+        register.id = RS_TYPES.OPERATOR;
+        stack.push(register);
+
+    }
+
+    public void recuerdaTipo(String value){
+       
+        RS register = new RS();
+        register.value = value;
+        register.id = RS_TYPES.TYPE;
+        stack.push(register);
+
+    }
+
+    public void recuerdaId(String value){
+       
+        RS register = new RS();
+        register.value = value;
+        register.id = RS_TYPES.ID;
+        stack.push(register);
+
+    }
+    
+    public void insertarTS(String value,int right,Symbol s){
+       
+        String type = stack.find(RS_TYPES.TYPE);
+        
+        while(stack.peek().value != type){
+            
+            RS_DO register =(RS_DO) stack.pop();
+            if(!table.validateEstructura(register.name)){
+                 
+                 Estructura variable = new Variable(register.type,register.name,s.right,register.value);
+                 table.addEstructura(register.name,variable);
+
+            }
+            else{
+                
+                addSemanticError(s,"la variable ya se encuentra declarada");
+            
+            }
+
+        }
+        
+        stack.pop();
+
+    }
+
+
+    /* BREAK JUMP al exit_label - CONTINUE JUMP al if o while_label */ 
+
+
+    public void startIf(){
+
+        RS_IF register = new RS_IF();
+        count++;
+        register.exit_label = "exit_label" + String.valueOf(count);
+        register.else_label = "else_label" + String.valueOf(count);
+        register.id = RS_TYPES.IF;
+        
+        stack.push(register);
+
+    }
+    
+    public void testIF(){
+        
+        RS register = stack.pop();
+        /* Generar el codigo de la evaluacion segun la direccion del RS_DO
+            Generar Jump Condicional con RS.IF.else_label */
+
+
+    }
+
+    public void startElse(){
+      
+          /* Generar "JUMP" + RS_IF.exit_label
+            Generar RS_IF.else_label + ":" */
+
+    }
+    
+    public void endIF(){
+        
+        /*Generar RS_IF.exit_label + ":" */
+
+        stack.pop();
+    
+    }
+
+    public void startWhile(){
+
+        RS_WHILE register = new RS_WHILE();
+        count++;
+        register.exit_label = "exit_label" + String.valueOf(count);
+        register.while_label = "while_label" + String.valueOf(count);
+        register.id = RS_TYPES.WHILE;
+
+        /*Generar RS_WHILE.while_label + ":" */
+
+        stack.push(register);
+
+
+    }
+
+    public void testWhile(){
+        
+        RS register = stack.pop();
+        /*Generar el código de la evaluación según RS_DO
+            Generar Jump Condicional con RS_WHILE.exit_label */
+    
+
+    }
+
+    public void endWhile(){
+
+        /*Generar “JUMP” + RS_WHILE.while_label
+            Generar RS_WHILE.exit_label + “:” */
+
+        RS register = stack.pop();
+        
+        /* del While (Eso dice en la ppt) */
+    }
+
+
+
+:}
 
 /*Synmbol Terminal and No-terminal*/
 /*TERMINALS*/

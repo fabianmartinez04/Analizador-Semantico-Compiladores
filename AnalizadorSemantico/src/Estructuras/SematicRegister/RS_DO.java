@@ -10,6 +10,6 @@ package Estructuras.SematicRegister;
  * @author pablo
  */
 public class RS_DO extends RS{
-    String type;
-    String name;
+    public String type;
+    public String name;
 }
