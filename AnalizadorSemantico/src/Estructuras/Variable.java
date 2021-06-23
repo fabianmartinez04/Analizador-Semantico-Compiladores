@@ -21,7 +21,7 @@ public class Variable extends Estructura {
 
     public Variable(String tipo, String nombre, int linea) {
         super(tipo,nombre,linea,"variable");
-        
+        this.dato = "";
         this.bandera = false;
     }
 

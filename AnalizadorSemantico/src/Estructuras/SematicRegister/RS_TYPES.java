@@ -8,6 +8,7 @@ public enum RS_TYPES {
     ID,
     OPERATOR,
     TYPE,
+    VALOR,
     DO,
     IF,
     WHILE,

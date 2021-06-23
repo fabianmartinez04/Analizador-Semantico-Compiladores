@@ -5,6 +5,8 @@
  */
 package Estructuras.SematicRegister;
 
+import java_cup.runtime.Symbol;
+
 /**
  *
  * @author pablo
@@ -12,4 +14,5 @@ package Estructuras.SematicRegister;
 public class RS {
     public RS_TYPES id;
     public String value;
+    public Symbol s;
 }

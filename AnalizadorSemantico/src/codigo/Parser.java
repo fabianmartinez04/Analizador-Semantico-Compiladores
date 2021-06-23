@@ -870,10 +870,11 @@ class CUP$Parser$actions {
         semanticList.add(error);
     }
 
-    public void recuerdaConst(String type,String value){
+    public void recuerdaConst(String type,String value,Symbol s){
        
         RS_DO register = new RS_DO();
         register.type = type;
+        register.s = s;
         register.value = value;
         register.id = RS_TYPES.DO;
         stack.push(register);
@@ -884,6 +885,7 @@ class CUP$Parser$actions {
     
         RS_DO register = new RS_DO();
         register.type = type;
+        register.s = s;
         register.name = name;
         register.id = RS_TYPES.DO;
         if(!(table.validateEstructura(name))){
@@ -894,51 +896,91 @@ class CUP$Parser$actions {
 
     }
 
-    public void recuerdaOperador(String value){
+    public void recuerdaOperador(String value,Symbol s){
        
         RS register = new RS();
         register.value = value;
+        register.s = s;
         register.id = RS_TYPES.OPERATOR;
         stack.push(register);
 
     }
 
-    public void recuerdaTipo(String value){
+    public void recuerdaTipo(String value,Symbol s){
        
         RS register = new RS();
         register.value = value;
+        register.s = s;
         register.id = RS_TYPES.TYPE;
         stack.push(register);
 
     }
 
-    public void recuerdaId(String value){
+    public void recuerdaId(String value,Symbol s){
        
         RS register = new RS();
         register.value = value;
+        register.s = s;
         register.id = RS_TYPES.ID;
         stack.push(register);
 
     }
+        
+    public void recuerdaValue(String value,Symbol s){
+
+        RS register = new RS();
+        register.value = value;
+        register.s = s;
+        register.id = RS_TYPES.VALOR;
+        stack.push(register);    
     
-    public void insertarTS(String value,int right,Symbol s){
+    }
+    
+    public void insertarTS(){
        
         String type = stack.find(RS_TYPES.TYPE);
         
         while(stack.peek().value != type){
             
-            RS_DO register =(RS_DO) stack.pop();
-            if(!table.validateEstructura(register.name)){
+            
+            if(stack.peek().id == RS_TYPES.VALOR){ 
+                
+                RS registerValor = stack.pop();
+                RS register = stack.pop();
+                
+                if(!table.validateEstructura(register.value)){
                  
-                 Estructura variable = new Variable(register.type,register.name,s.right,register.value);
-                 table.addEstructura(register.name,variable);
+                    Estructura variable = new Variable(type,register.value,register.s.right,registerValor.value);
+                    table.addEstructura(register.value,variable);
+
+                }
+                else{
+
+                    addSemanticError(register.s,"la variable ya se encuentra declarada");
+
+                }
 
             }
             else{
                 
-                addSemanticError(s,"la variable ya se encuentra declarada");
-            
+                RS register = stack.pop();
+                
+                if(!table.validateEstructura(register.value)){
+                 
+                    Estructura variable = new Variable(type,register.value,register.s.right);
+                    table.addEstructura(register.value,variable);
+
+                }
+                else{
+
+                    addSemanticError(register.s,"la variable ya se encuentra declarada");
+
+                }
+
+
             }
+          
+            
 
         }
         
@@ -1332,10 +1374,14 @@ class CUP$Parser$actions {
 		int ileft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
 		int iright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
 		String i = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		String e = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		int atleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int atright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String at = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-
+		recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek()));
+                recuerdaValue(at,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("var_decl",6, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1347,7 +1393,7 @@ class CUP$Parser$actions {
 		int ileft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int iright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String i = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-
+		 recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("var_decl",6, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1365,7 +1411,8 @@ class CUP$Parser$actions {
 		int vdleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int vdright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String vd = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-
+		 recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); 
+        recuerdaValue(at,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("var_decl",6, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1380,7 +1427,7 @@ class CUP$Parser$actions {
 		int vdleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int vdright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String vd = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-
+		 recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("var_decl",6, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1431,7 +1478,8 @@ class CUP$Parser$actions {
 		int vdleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
 		int vdright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		String vd = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
-
+		recuerdaTipo(vt,((java_cup.runtime.Symbol)CUP$Parser$stack.peek()));
+                  insertarTS(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("const_decl",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1608,7 +1656,8 @@ class CUP$Parser$actions {
 		int ileft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int iright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String i = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-
+		 recuerdaTipo(vt,((java_cup.runtime.Symbol)CUP$Parser$stack.peek()));
+                    recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("var_func_decl",12, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
