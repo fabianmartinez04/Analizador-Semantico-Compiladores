@@ -15,7 +15,7 @@ import java.util.ListIterator;
  * @author pablo
  */
 public class SemanticStack {
-  LinkedList<RS> stack;
+  LinkedList<RS> stack = new LinkedList<>();
   
   
   
@@ -44,5 +44,9 @@ public class SemanticStack {
       
         return this.stack.getLast();
     
+    }
+    
+    public int getSize() {
+        return this.stack.size();
     }
 }

@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import Estructuras.SemanticStack;
 import Estructuras.SematicRegister.*;
 import Estructuras.*;
+import java.util.ArrayList;
 
 
 /*Parser code*/
@@ -50,8 +51,8 @@ parser code
 action code
 
 {:
-    private TablaSimbolosSemantico table = new TablaSimbolosSemantico();
-    private SemanticStack stack = new SemanticStack();
+    public TablaSimbolosSemantico table = new TablaSimbolosSemantico();
+    public SemanticStack stack = new SemanticStack();
     public LinkedList<ErrorMsg> semanticList = new LinkedList<ErrorMsg>();
     int count = 0;
 
@@ -61,28 +62,20 @@ action code
         semanticList.add(error);
     }
 
-    public void recuerdaConst(String type,String value,Symbol s){
-       
-        RS_DO register = new RS_DO();
-        register.type = type;
-        register.s = s;
-        register.value = value;
-        register.id = RS_TYPES.DO;
+    public void recuerdaConst(String value,Symbol s){
+        RS_DO register = new RS_DO(RS_TYPES.DO,value,s);
+        register.type = "constante";
         stack.push(register);
 
     }
     
-    public void recuerdaVariable(String type,String name,Symbol s){
-    
-        RS_DO register = new RS_DO();
-        register.type = type;
-        register.s = s;
+    public void recuerdaVariable(String name,Symbol s){
+        RS_DO register = new RS_DO(RS_TYPES.DO, "", s);
+        register.type = "direccion";
         register.name = name;
-        register.id = RS_TYPES.DO;
         if(!(table.validateEstructura(name))){
            addSemanticError(s,"la variable no se encuentra declarada");
         }
-
         stack.push(register);
 
     }
@@ -134,7 +127,7 @@ action code
         while(stack.peek().value != type){
             
             
-            if(stack.peek().id == RS_TYPES.VALOR){ 
+            if(stack.peek().id == RS_TYPES.DO){ 
                 
                 RS registerValor = stack.pop();
                 RS register = stack.pop();
@@ -157,26 +150,86 @@ action code
                 RS register = stack.pop();
                 
                 if(!table.validateEstructura(register.value)){
-                 
-                    Estructura variable = new Variable(type,register.value,register.s.right);
-                    table.addEstructura(register.value,variable);
+                    if (register.s != null) {
+                        Estructura variable = new Variable(type,register.value,register.s.right);
+                        table.addEstructura(register.value,variable);
+                    } else {
+                        Estructura variable = new Variable(type,"",-1,register.value);
+                        table.addEstructura(register.value,variable);
+                    }
+
 
                 }
                 else{
 
                     addSemanticError(register.s,"la variable ya se encuentra declarada");
-
                 }
-
-
             }
-          
-            
+        }
+        stack.pop();
+    }
 
+    public void insertarTSFuncion() {
+        ArrayList<Parametro> p = new ArrayList();
+
+        while (stack.getSize() > 2) {
+            RS id = stack.pop();
+            RS type = stack.pop();
+            Parametro temp = new Parametro(type.value,id.value);
+            p.add(0,temp);
+        }
+        for (int index = 0; index > p.size(); index++) {
+            p.get(index).setOrden(index+1);
+        }
+        RS id = stack.pop();
+        RS type = stack.pop();
+        if (p.size() == 0) {
+            Estructura funcion = new Funcion(type.value,id.value, id.s.right);
+            table.addEstructura(id.value,funcion);
+        } else {
+            Estructura funcion = new Funcion(type.value,id.value,p,id.s.right);
+            table.addEstructura(id.value,funcion);
         }
         
-        stack.pop();
+       
+    }
 
+
+    public void evalBinary () {
+        RS operator = stack.pop();
+        RS register2 = stack.pop();
+        RS register1 = stack.pop();
+        RS_DO register = new RS_DO(RS_TYPES.DO,"",null);
+        if (((RS_DO)register2).type == "constante" && ((RS_DO)register1).type == "constante") {
+            Integer n2 = Integer.parseInt(register2.value);
+            Integer n1 = Integer.parseInt(register1.value);
+            register.type = "constante";
+            switch(operator.value) {
+                case "+" : {
+                    register.value = String.valueOf(n1 + n2);
+                    break;
+                }
+                case "-" : {
+                    register.value = String.valueOf(n1 - n2);
+                    break;
+                }
+                case "/": {
+                    register.value = String.valueOf(n1 / n2);
+                    break;
+                }
+                // mul case
+                default : {
+                    register.value = String.valueOf(n1 * n2);
+                }
+            }
+            
+        } else {
+            /* generar el código para la operación */
+            register.type = "direccion";
+            /*Guardar la dirección donde queda el resultado de la operación, registro o variable temporal*/
+        }
+        stack.push(register);
+   
     }
 
 
@@ -280,9 +333,9 @@ start with program;
 
 
 
-program ::= decl_list:dl
-    
+program ::= decl_list 
 ;
+
 decl_list ::= declaration:d decl_list:dl
     | declaration:d | asign_equal:ae
 ;
@@ -296,21 +349,20 @@ declaration ::= global_decl:gl
     | error CLOSE_BRACKET:cb {:addSintaxError(cb," Missing token ");:}
     | error IDENTIFIER:i     {:addSintaxError(i," Missing token ");:}
 ;
-global_decl ::= var_func_decl COMMA var_decl:vd SEMICOLON
-    | var_func_decl EQUAL assigment_type:at COMMA var_decl:vd SEMICOLON
-    | var_func_decl SEMICOLON 
-    | var_func_decl EQUAL assigment_type:at SEMICOLON 
+global_decl ::= var_func_decl COMMA var_decl:vd SEMICOLON {: insertarTS(); :}
+    | var_func_decl EQUAL assigment_type:at COMMA var_decl:vd SEMICOLON {: insertarTS(); :}
+    | var_func_decl SEMICOLON {: insertarTS(); :}
+    | var_func_decl EQUAL assigment_type:at SEMICOLON {: insertarTS(); :}
 ;
-var_type ::=  I_SHORT:i
-    | I_LONG:i
-    | I_INT:i
-    | I_CHAR:i MUL:m
-    | I_CHAR
+var_type ::=  I_SHORT:i {: recuerdaTipo(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | I_LONG:i {: recuerdaTipo(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | I_INT:i {: recuerdaTipo(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | I_CHAR:i MUL:m  {: recuerdaTipo(i+m,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | I_CHAR:i {: recuerdaTipo(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
 ;
 var_decl   ::= IDENTIFIER:i 
             EQUAL:e assigment_type:at 
-            {:recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek()));
-                recuerdaValue(at,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+            {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
     
     | IDENTIFIER:i 
         {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
@@ -320,46 +372,38 @@ var_decl   ::= IDENTIFIER:i
       EQUAL assigment_type:at 
     
       COMMA var_decl:vd
-      {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); 
-        recuerdaValue(at,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :} 
+      {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :} 
     | IDENTIFIER:i 
     
       COMMA var_decl:vd 
       {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :} 
   
 ;
-assigment_type ::= LITERAL_STR:ls
+assigment_type ::= LITERAL_STR:ls {: recuerdaConst(ls,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
                 | expr_math:em 
                 | literal:l
 ;
-const_decl  ::= I_CONST var_type:vt 
-              
-                var_decl:vd SEMICOLON 
-                {:recuerdaTipo(vt,((java_cup.runtime.Symbol)CUP$Parser$stack.peek()));
-                  insertarTS(); :}
+const_decl  ::= I_CONST var_type:vt var_decl:vd SEMICOLON {: insertarTS(); :}
           
                 
           
 ;
-funct_decl ::= functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb OPEN_KEY:ok stmts:s CLOSE_KEY:ck
-    | functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb OPEN_KEY:ok stmts:s CLOSE_KEY:ck
-    | functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb OPEN_KEY:ok CLOSE_KEY:ck
-    | functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb OPEN_KEY:ok CLOSE_KEY:ck
-    //| functin_init:fi OPEN_BRACKET:ob error CLOSE_BRACKET:cb OPEN_KEY:ok CLOSE_KEY:ck   {:addSintaxError(cb,"Function param invalid");:}
-    //| functin_init:fi OPEN_BRACKET:ob error OPEN_KEY:ok CLOSE_KEY:ck {:addSintaxError(ok," Missing token ");:}
-    //| functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb error stmts:s CLOSE_KEY:ck   {:addSintaxError(cb," Missing token ");:}
-    //| functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb error stmts:s CLOSE_KEY:ck   {:addSintaxError(ck," Missing token");:}
+funct_decl ::= functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb OPEN_KEY:ok stmts:s CLOSE_KEY:ck 
+    | functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb OPEN_KEY:ok stmts:s CLOSE_KEY:ck 
+    | functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb OPEN_KEY:ok CLOSE_KEY:ck  {: insertarTSFuncion(); :}
+    | functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb OPEN_KEY:ok CLOSE_KEY:ck {: insertarTSFuncion(); :}
 ;
 functin_init   ::= var_func_decl:cfd
-    | I_VOID:i IDENTIFIER:id
+    | I_VOID:i IDENTIFIER:id 
+    {: recuerdaTipo(i,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1))); 
+       recuerdaId(id,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
 ;
 var_func_decl_list   ::= var_func_decl:vfd COMMA var_func_decl_list:vfdl
-    | var_func_decl:vfd
+    | var_func_decl:vfd 
 ;
-var_func_decl ::= var_type:vt 
+var_func_decl ::= var_type:vt  
                 IDENTIFIER:i 
-                {: recuerdaTipo(vt,((java_cup.runtime.Symbol)CUP$Parser$stack.peek()));
-                    recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}               
+                {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}               
 ;
 stmts ::= const_decl stmts:s
         | const_decl
@@ -509,25 +553,22 @@ equals ::= ADD_EQUAL
 ;
 
 
-
-
-
 expr_math ::= OPEN_BRACKET:o expr_math:em CLOSE_BRACKET:c expr_math:em1
             | OPEN_BRACKET:o expr_math:em CLOSE_BRACKET:c
-            | literal:u expr_uni:eu
+            | literal:u expr_uni:eu {: evalBinary(); :}
             | expr_uni:eu
 ;
 
-expr_uni ::= ADD:a literal:n expr_uni:eu
-    | ADD:a literal:n
-    | SUB:s literal:n expr_uni:eu
-    | SUB:s literal:n
-    | MUL:m literal:n expr_uni:eu
-    | MUL:m literal:n 
-    | DIV:d literal:n expr_uni:eu
-    | DIV:d literal:n
-    | MOD:d literal:n expr_uni:eu
-    | MOD:d literal:n 
+expr_uni ::= ADD:a literal:n expr_uni:eu {: recuerdaOperador(a,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | ADD:a literal:n {: recuerdaOperador(a,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | SUB:s literal:n expr_uni:eu {: recuerdaOperador(s,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | SUB:s literal:n {: recuerdaOperador(s,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | MUL:m literal:n expr_uni:eu {: recuerdaOperador(m,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | MUL:m literal:n {: recuerdaOperador(m,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | DIV:d literal:n expr_uni:eu {: recuerdaOperador(d,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | DIV:d literal:n {: recuerdaOperador(d,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | MOD:d literal:n expr_uni:eu {: recuerdaOperador(d,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | MOD:d literal:n {: recuerdaOperador(d,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
 ;
 
 symbol ::= ADD:a
@@ -537,11 +578,11 @@ symbol ::= ADD:a
         |MOD:d
 ;
 
-literal ::= NUMBER:n
-    | IDENTIFIER:i
-    | OCTAL_NUMBER:n
-    | HEXADECIMAL_NUMBER:n
-    | BINARY_NUMBER:n
+literal ::= NUMBER:n {: recuerdaConst(n,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | IDENTIFIER:i {: recuerdaVariable(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | OCTAL_NUMBER:n {: recuerdaConst(n,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | HEXADECIMAL_NUMBER:n {: recuerdaConst(n,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | BINARY_NUMBER:n {: recuerdaConst(n,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
     | call_fun:cf
 ;
 

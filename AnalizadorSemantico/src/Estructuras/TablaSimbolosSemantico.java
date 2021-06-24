@@ -97,5 +97,22 @@ public class TablaSimbolosSemantico {
         
     }
     
+    public Variable getVariable(String name){
+
+        for(int i = 0 ; i<this.llaves.size();i++){
+
+            if(this.tabla.get(this.llaves.get(i)).nombre.equals(name) && 
+                    this.tabla.get(this.llaves.get(i)).estructura.equals("variable")){
+                return (Variable) this.tabla.get(this.llaves.get(i));
+            }
+
+
+
+        }
+        return null;
+ 
+
+    }
+    
     
 }

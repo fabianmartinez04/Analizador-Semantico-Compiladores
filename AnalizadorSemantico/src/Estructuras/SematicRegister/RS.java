@@ -15,4 +15,12 @@ public class RS {
     public RS_TYPES id;
     public String value;
     public Symbol s;
+    
+    public RS(RS_TYPES rt, String v, Symbol s) {
+        this.id = rt;
+        this.value = v;
+        this.s = s;
+    }
+    
+    public RS(){}
 }

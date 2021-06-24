@@ -14,9 +14,8 @@ public class Parametro {
     String nombre;
     int orden;
 
-    public Parametro(String tipo,int orden, String nombre) {
+    public Parametro(String tipo, String nombre) {
         this.tipo = tipo;
-        this.orden = orden;
         this.nombre = nombre;
     }
 
@@ -26,6 +25,10 @@ public class Parametro {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+    
+    public void setOrden(int pOrden) {
+        this.orden = pOrden;
     }
 
     public String getNombre() {

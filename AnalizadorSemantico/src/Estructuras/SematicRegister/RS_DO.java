@@ -5,6 +5,7 @@
  */
 package Estructuras.SematicRegister;
 
+import java_cup.runtime.Symbol;
 /**
  *
  * @author pablo
@@ -12,4 +13,11 @@ package Estructuras.SematicRegister;
 public class RS_DO extends RS{
     public String type;
     public String name;
+    
+    public RS_DO() {}
+    
+    public RS_DO(RS_TYPES id, String value, Symbol s) {
+        super(id, value, s);
+    }
+
 }

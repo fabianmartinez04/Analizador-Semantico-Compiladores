@@ -7,6 +7,8 @@ package codigo;
 import Estructuras.Estructura;
 import Estructuras.Funcion;
 import Estructuras.Parametro;
+import Estructuras.SemanticStack;
+import Estructuras.SematicRegister.RS;
 import Estructuras.TablaSimbolosScanner;
 import Estructuras.TablaSimbolosSemantico;
 import Estructuras.Token;
@@ -20,9 +22,10 @@ import java.util.ArrayList;
  */
 public class Principal {
     public static void main(String[] args) {
-       String ruta = "C:/Users/liset/OneDrive/Documentos/Ingenieria en Computacion/Computacion V Semestre/Compiladores e interpretes/Proyectos/Parser/AnalizadorSintactico/src/codigo/Lexer.flex";
+      // String ruta = "C:/Users/liset/OneDrive/Documentos/Ingenieria en Computacion/Computacion V Semestre/Compiladores e interpretes/Proyectos/Parser/AnalizadorSintactico/src/codigo/Lexer.flex";
       // ruta = "D:/Desktop/CI/Proyectos/Etapa 1/Analizador-Lexico-Compiladores/AnalizadorLexico/src/codigo/Lexer.flex";
-       generar(ruta);
+      // generar(ruta);
+       
      /* Parametro uno = new Parametro("int", 1,"largo");
       Parametro dos = new Parametro("String", 2, "hola");
       
