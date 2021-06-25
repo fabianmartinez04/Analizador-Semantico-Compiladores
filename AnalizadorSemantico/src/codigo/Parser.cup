@@ -87,7 +87,7 @@ action code
         else if (value.matches("[0-9]+") && value.length() > 0){        
             return "int";
         } else {
-            return "String";
+            return "char*";
         }
     }
 
@@ -393,26 +393,20 @@ var_type ::=  I_SHORT:i {: recuerdaTipo(i,((java_cup.runtime.Symbol)CUP$Parser$s
     | I_CHAR:i MUL:m  {: recuerdaTipo(i+m,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
     | I_CHAR:i {: recuerdaTipo(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
 ;
-var_decl   ::= IDENTIFIER:i 
-            EQUAL:e assigment_type:at 
-            {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+var_decl   ::= IDENTIFIER:i EQUAL:e assigment_type:at 
+            {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2))); :}
     
     | IDENTIFIER:i 
         {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
         
-    | IDENTIFIER:i 
-      
-      EQUAL assigment_type:at 
-    
-      COMMA var_decl:vd
-      {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :} 
-    | IDENTIFIER:i 
-    
-      COMMA var_decl:vd 
-      {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :} 
+    | IDENTIFIER:i EQUAL assigment_type:at COMMA var_decl:vd
+      {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4))); :} 
+    | IDENTIFIER:i COMMA var_decl:vd 
+      {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2))); :} 
   
 ;
 assigment_type ::= LITERAL_STR:ls {: recuerdaConst(ls,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+                | LITERAL_CHAR:lc {: recuerdaConst(lc,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
                 | expr_math:em 
                 | literal:l
 ;
@@ -559,7 +553,7 @@ change_var ::= INCR:i
 condition_list ::= condition comparator condition_list 
                 |condition
 ;
-condition ::=  var:v comparator:c var:v1
+condition ::=  var:v comparator:c var:v1 
             | OPEN_BRACKET var:v comparator:c var:v1 CLOSE_BRACKET
             | OPEN_BRACKET var:v CLOSE_BRACKET
 

@@ -42,7 +42,7 @@ Comment = "//".*
 ("\""({BackSlash}|{L}|{DecDigit}|" "|"\t"|"\r"|{Invalid}|{Acentos})*"\"")  {lexeme = yytext(); row = yyline; column = yycolumn; return LiteralString; }
 
 /*Char*/
-("\'"({BackSlash}|{L}|{DecDigit}|" "|"\t"|"\r"|{Invalid}|{Acentos})"\'")  {lexeme = yytext(); row = yyline; column = yycolumn; return LiteralString; }
+("\'"({BackSlash}|{L}|{DecDigit}|" "|"\t"|"\r"|{Invalid}|{Acentos})"\'")  {lexeme = yytext(); row = yyline; column = yycolumn; return LiteralChar; }
 
 /*Numbers*/
 

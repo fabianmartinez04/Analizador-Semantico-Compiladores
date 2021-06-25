@@ -21,5 +21,6 @@ public enum TipoToken {
     LiteralString,
     WhiteSpace,
     PointFloatingNumber,
+    LiteralChar,
     ERROR
 }
