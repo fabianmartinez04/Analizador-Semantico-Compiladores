@@ -12,6 +12,9 @@ import Estructuras.SematicRegister.*;
 import Estructuras.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java_cup.runtime.XMLElement;
 
 /** CUP v0.11b 20160615 (GIT 4ac7450) generated parser.
@@ -834,9 +837,8 @@ public class Parser extends java_cup.runtime.lr_parser {
     public LinkedList<ErrorMsg> errorList = new LinkedList<ErrorMsg>();
     private Integer row, column;
     private String tokenName;
+    
 
-    
-    
    public void syntax_error(Symbol s) 
     {
         String lexeme = s.value.toString();
@@ -879,6 +881,9 @@ class CUP$Parser$actions {
     public SemanticStack stack = new SemanticStack();
     public Hashtable<String, ErrorMsg> semanticList = new Hashtable<>();
     int count = 0;
+    Nasm nasmRegisters = new Nasm();
+    String sectionData = "SECTION .data ; data section \n";
+    String sectionCode = "SECTION .text ; code section \n \t global _start ; entry point \n_start: \n";
 
     public void addSemanticError(Symbol s, String msg) 
     {
@@ -1001,6 +1006,7 @@ class CUP$Parser$actions {
                  
                         Estructura variable = new Variable(type,register.value,register.s.right,registerValor.value);
                         table.addEstructura(register.value,variable);
+                        sectionData = sectionData + "\t " + register.value + ": dd \t" + registerValor.value + " \n";
                     }
                     else{
                         addSemanticError(register.s,"la variable ya se encuentra declarada");
@@ -1018,6 +1024,7 @@ class CUP$Parser$actions {
                             Estructura variable = new Variable(type,"",-1,register.value);
                             table.addEstructura(register.value,variable);
                         }
+                        
                     }
                     else{
                         addSemanticError(register.s,"la variable ya se encuentra declarada");
@@ -1084,8 +1091,46 @@ class CUP$Parser$actions {
             
         } else {
             /* generar el código para la operación */
-            register.type = "direccion";
-            /*Guardar la dirección donde queda el resultado de la operación, registro o variable temporal*/
+            NasmRegister r1 = new NasmRegister("rax");
+            NasmRegister r2 = nasmRegisters.getFreeRegister();
+            if (r1 == null || r2 == null) {
+                // no hay registros para realizar la operación
+                return;
+            }
+            if (((RS_DO)register1).type == "constante") {
+                sectionCode += "\tmov \t " + r1.name + "," + Integer.parseInt(register1.value) + "\n"; 
+            } else {
+                sectionCode += "\tmov \t " + r1.name + "," + ((RS_DO)register1).name + "\n"; 
+            }
+            if (((RS_DO)register2).type == "constante") {
+                sectionCode += "\tmov \t " + r2.name + "," + Integer.parseInt(register2.value) + "\n"; 
+            } else {
+                sectionCode += "\tmov \t " + r2.name + "," + ((RS_DO)register2).name + "\n";
+            }
+            switch(operator.value) {
+                case "+" : {
+                    sectionCode += "\tadd \t" + r1.name + "," + r2.name + "\n";
+                    break;
+                }
+                case "-" : {
+                    sectionCode += "\tsub \t" + r1.name + "," + r2.name + "\n";
+                    break;
+                }
+                case "/": {
+                    sectionCode += "\tdiv \t" + r2.name + "\n";
+                    break;
+                }
+                // mul case
+                default : {
+                    sectionCode += "\tmul \t" + r2.name + "\n";
+                }
+            }
+            register.type = "constante";
+            /*Guardar la dirección donde queda el resultado de la operación, registro o variable temporal*/            
+            register.value = "0";
+            RS r_var = stack.peek();
+            sectionCode += "\tmov \t" + "[" + r_var.value + "]" + "," + r1.name + "\n";
+            nasmRegisters.setRegisterState(r2.name,true);
         }
         stack.push(register);
    
@@ -1165,6 +1210,23 @@ class CUP$Parser$actions {
         /* del While (Eso dice en la ppt) */
     }
 
+    public void writeAssembler() {
+        if (!semanticList.isEmpty()) {
+            return;
+        }
+        Writer assemblerCode;
+        try {
+            assemblerCode = new FileWriter("code.asm", false);
+            assemblerCode.write(this.sectionData);
+            assemblerCode.write(this.sectionCode);
+            assemblerCode.write("final: \n\t mov \t ebx,0 \n\t mov \t eax,1 \n\t int \t 0x80");
+            assemblerCode.close();
+        } catch (IOException ex) {
+            System.err.println(ex.toString());
+        };
+        System.out.print("write function called");
+    }
+
 
 
 
@@ -1207,7 +1269,7 @@ class CUP$Parser$actions {
           case 1: // program ::= decl_list 
             {
               String RESULT =null;
-
+		 writeAssembler(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("program",0, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
