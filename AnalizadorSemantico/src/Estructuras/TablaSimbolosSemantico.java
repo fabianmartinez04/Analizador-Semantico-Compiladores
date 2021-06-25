@@ -23,14 +23,13 @@ public class TablaSimbolosSemantico {
     }
     
     public void addEstructura(String llave,Estructura nueva){
-        
         this.tabla.put(llave, nueva);
         this.llaves.add(llave);
     }
     
     public boolean getBandera(String dato){
         
-        if(this.llaves.contains(dato)){
+        if(this.tabla.containsKey(dato)){
             if(this.tabla.get(dato).estructura.equals("variable")){
             
                 Variable variable = (Variable) this.tabla.get(dato);

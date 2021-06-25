@@ -5,7 +5,6 @@
  */
 package Estructuras;
 
-import java.util.ArrayList;
 
 /**
  *
@@ -16,12 +15,14 @@ public class Estructura {
     String nombre;
     int linea;
     String estructura;
+    boolean error;
 
     public Estructura(String tipo, String nombre, int linea,String estructura) {
         this.tipo = tipo;
         this.nombre = nombre;
         this.linea = linea;
         this.estructura = estructura;
+        this.error = false;
     }
 
     public String getTipo() {
@@ -48,6 +49,13 @@ public class Estructura {
         this.linea = linea;
     }
     
+    public void setError(boolean pError) {
+        this.error = pError;
+    }
+    
+    public boolean getError() {
+        return this.error;
+    }
     
      public String imprimir(){
         String datos = "Tipo: " + this.tipo + "\n"+

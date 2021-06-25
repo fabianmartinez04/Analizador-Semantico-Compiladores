@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -344,8 +345,10 @@ public class frmPrincipal extends javax.swing.JFrame {
                     jTextSemanticError.setText("Análisis semántico existoso");
                 } else {
                     jTextSemanticError.setForeground(Color.red);
-                    for (ErrorMsg sinError : parser.action_obj.semanticList) {
-                        jTextSemanticError.setText(jTextSemanticError.getText() + sinError.getError() + "\n");
+                    Enumeration<String> sinError = parser.action_obj.semanticList.keys();
+                    while (sinError.hasMoreElements()) {
+                        String key = sinError.nextElement();
+                        jTextSemanticError.setText(jTextSemanticError.getText() + parser.action_obj.semanticList.get(key).getError() + "\n");
                     }
                 }
                 // show content of the symbol table
@@ -361,19 +364,18 @@ public class frmPrincipal extends javax.swing.JFrame {
                     tableModel.addRow(t.get(index));
                 }
                 // for debug
-                System.out.println(parser.action_obj.table.imprimirTablaSimbolos());
-                for (ErrorMsg sinError : parser.action_obj.semanticList) {
-                    System.out.println(sinError.getError() + "\n");
-                }
+                //System.out.println(parser.action_obj.table.imprimirTablaSimbolos());}
             } catch (Exception ex) {
                 jTextSintaxResult.setForeground(Color.red);
                 System.out.println(ex);
                 jTextSintaxResult.setText("Fatal error: Unkown sintax error");
             }
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(frmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(frmPrincipal.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(frmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(frmPrincipal.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnAnalizarActionPerformed
 
@@ -394,13 +396,17 @@ public class frmPrincipal extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(frmPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(frmPrincipal.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(frmPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(frmPrincipal.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(frmPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(frmPrincipal.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(frmPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(frmPrincipal.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 

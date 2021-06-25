@@ -11,6 +11,7 @@ import Estructuras.SemanticStack;
 import Estructuras.SematicRegister.*;
 import Estructuras.*;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java_cup.runtime.XMLElement;
 
 /** CUP v0.11b 20160615 (GIT 4ac7450) generated parser.
@@ -876,13 +877,15 @@ class CUP$Parser$actions {
 
     public TablaSimbolosSemantico table = new TablaSimbolosSemantico();
     public SemanticStack stack = new SemanticStack();
-    public LinkedList<ErrorMsg> semanticList = new LinkedList<ErrorMsg>();
+    public Hashtable<String, ErrorMsg> semanticList = new Hashtable<>();
     int count = 0;
 
     public void addSemanticError(Symbol s, String msg) 
     {
         ErrorMsg error =  new ErrorMsg(s.value.toString(), "Semantic error: " + msg, s.right, s.left);
-        semanticList.add(error);
+        if(!semanticList.containsKey(s.value.toString())) {
+            semanticList.put(s.value.toString(),error);
+        }
     }
 
     public void recuerdaConst(String value,Symbol s){
