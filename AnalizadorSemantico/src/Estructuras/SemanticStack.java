@@ -41,7 +41,9 @@ public class SemanticStack {
         return "";
     }
     public RS peek() {
-      
+        if (this.stack.size() == 0) {
+            return null;
+        }
         return this.stack.getLast();
     
     }

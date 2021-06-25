@@ -55,8 +55,15 @@ public class Funcion extends Estructura{
     }
     
     
+    public boolean compareArgs(ArrayList<Parametro> args) {
+        for (int index = 0; index < this.parametros.size(); index++) {
+            if (!args.get(index).tipo.equals(this.parametros.get(index).tipo)) {
+                return false;
+            }
+        }
+        return true;
+    }
     
-
     public String imprimir(){
         String datos= super.imprimir()+ "\n"+
                 "Parametros\n\n";

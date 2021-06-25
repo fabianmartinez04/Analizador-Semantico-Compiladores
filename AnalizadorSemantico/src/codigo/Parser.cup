@@ -80,6 +80,47 @@ action code
 
     }
 
+    public String getLiteralType(String value) {
+        if (value.matches("[A-Za-z]")) {
+            return "char";
+        }
+        else if (value.matches("[0-9]+") && value.length() > 0){        
+            return "int";
+        } else {
+            return "String";
+        }
+    }
+
+    public void recuerdaFuncion(String name, Symbol s) {
+        if(!(table.validateEstructura(name))){
+           addSemanticError(s,"la función no se encuentra declarada");
+        } else {
+            ArrayList<Parametro> args = new ArrayList();
+            Funcion f = table.getFuncion(name);
+            while(stack.getSize() > 2) {
+                RS_DO arg = (RS_DO)stack.pop();
+                if (arg.type.equals("constante")) {
+                    String type = getLiteralType(arg.value);
+                    Parametro p = new Parametro(type,arg.value);
+                    args.add(0,p);
+                }
+            }
+            if (args.size() != f.getParametros().size()) {
+                addSemanticError(s,"la cantidad de parametros no coincide con la definición de la función");
+                stack.pop();
+                stack.pop();
+            }
+            else if (!f.compareArgs(args)) {
+                addSemanticError(s,"el tipo de los parametros no coincide con la definición de la función");
+                stack.pop();
+                stack.pop();
+            }
+            else {
+                System.out.println("Función llamada correctamente.");
+            }
+        }
+    }
+
     public void recuerdaOperador(String value,Symbol s){
        
         RS register = new RS();
@@ -122,51 +163,43 @@ action code
     
     public void insertarTS(){
        
-        String type = stack.find(RS_TYPES.TYPE);
-        
-        while(stack.peek().value != type){
-            
-            
-            if(stack.peek().id == RS_TYPES.DO){ 
+        if (stack.peek() != null) {
+            String type = stack.find(RS_TYPES.TYPE);
+            while(stack.peek().value != type){
+                if(stack.peek().id == RS_TYPES.DO){ 
                 
-                RS registerValor = stack.pop();
-                RS register = stack.pop();
+                    RS registerValor = stack.pop();
+                    RS register = stack.pop();
                 
-                if(!table.validateEstructura(register.value)){
+                    if(!table.validateEstructura(register.value)){
                  
-                    Estructura variable = new Variable(type,register.value,register.s.right,registerValor.value);
-                    table.addEstructura(register.value,variable);
-
-                }
-                else{
-
-                    addSemanticError(register.s,"la variable ya se encuentra declarada");
-
-                }
-
-            }
-            else{
-                
-                RS register = stack.pop();
-                
-                if(!table.validateEstructura(register.value)){
-                    if (register.s != null) {
-                        Estructura variable = new Variable(type,register.value,register.s.right);
-                        table.addEstructura(register.value,variable);
-                    } else {
-                        Estructura variable = new Variable(type,"",-1,register.value);
+                        Estructura variable = new Variable(type,register.value,register.s.right,registerValor.value);
                         table.addEstructura(register.value,variable);
                     }
-
-
+                    else{
+                        addSemanticError(register.s,"la variable ya se encuentra declarada");
+                    }
                 }
                 else{
-
-                    addSemanticError(register.s,"la variable ya se encuentra declarada");
+                
+                    RS register = stack.pop();
+                
+                    if(!table.validateEstructura(register.value)){
+                        if (register.s != null) {
+                            Estructura variable = new Variable(type,register.value,register.s.right);
+                            table.addEstructura(register.value,variable);
+                        } else {
+                            Estructura variable = new Variable(type,"",-1,register.value);
+                            table.addEstructura(register.value,variable);
+                        }
+                    }
+                    else{
+                        addSemanticError(register.s,"la variable ya se encuentra declarada");
+                    }
                 }
-            }
         }
         stack.pop();
+        }
     }
 
     public void insertarTSFuncion() {
@@ -178,7 +211,7 @@ action code
             Parametro temp = new Parametro(type.value,id.value);
             p.add(0,temp);
         }
-        for (int index = 0; index > p.size(); index++) {
+        for (int index = 0; index < p.size(); index++) {
             p.get(index).setOrden(index+1);
         }
         RS id = stack.pop();
@@ -327,7 +360,7 @@ non terminal String literal, declaration, var_func_decl_list, stmts, var_func_de
 non terminal String structs, struct_decl, struct_type, condition_for, condition, var, comparator, change_var,if,else;
 non terminal String switch_sent,mult_case_stmt, case_stmt, case_fin, return,if_sent,if_inst,else_inst, asign_equal,read_func,write_func;
 non terminal String equals, incr_decr, math_expr, expr_uni, expr_math, expr,symbol,case_default,cases_switch,stmts_switch,assigment_type,call_fun ,var_list;
-
+non terminal String first_part_function, fisrt_part_function2;
 
 start with program;
 
@@ -388,10 +421,15 @@ const_decl  ::= I_CONST var_type:vt var_decl:vd SEMICOLON {: insertarTS(); :}
                 
           
 ;
-funct_decl ::= functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb OPEN_KEY:ok stmts:s CLOSE_KEY:ck 
-    | functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb OPEN_KEY:ok stmts:s CLOSE_KEY:ck 
+funct_decl ::= first_part_function stmts:s CLOSE_KEY:ck
+    | fisrt_part_function2 stmts:s CLOSE_KEY:ck 
     | functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb OPEN_KEY:ok CLOSE_KEY:ck  {: insertarTSFuncion(); :}
     | functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb OPEN_KEY:ok CLOSE_KEY:ck {: insertarTSFuncion(); :}
+;
+
+first_part_function ::= functin_init:fi OPEN_BRACKET:ob var_func_decl_list:vfdl CLOSE_BRACKET:cb OPEN_KEY:ok {: insertarTSFuncion(); :}
+;
+fisrt_part_function2 ::= functin_init:fi OPEN_BRACKET:ob CLOSE_BRACKET:cb OPEN_KEY:ok {: insertarTSFuncion(); :}
 ;
 functin_init   ::= var_func_decl:cfd
     | I_VOID:i IDENTIFIER:id 
@@ -429,8 +467,6 @@ stmts ::= const_decl stmts:s
         | call_fun:cf SEMICOLON:sc
         | return:r stmts
         | return:r
-        | case_fin:cf stmts
-        | case_fin:cf
 
 ;   
 stmts_switch ::= structs:st stmts_switch:sw
@@ -455,8 +491,8 @@ stmts_switch ::= structs:st stmts_switch:sw
                 | return:r
 ;
 
-call_fun ::= IDENTIFIER:i OPEN_BRACKET:ob CLOSE_BRACKET:cb 
-            | IDENTIFIER:i OPEN_BRACKET:ob var_list:vl CLOSE_BRACKET:cb 
+call_fun ::= IDENTIFIER:i OPEN_BRACKET:ob CLOSE_BRACKET:cb {: recuerdaFuncion(i,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2))); :}
+            | IDENTIFIER:i OPEN_BRACKET:ob var_list:vl CLOSE_BRACKET:cb  {: recuerdaFuncion(i,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3))); :}
 ;
 
 read_func ::= I_READ:r OPEN_BRACKET:ob IDENTIFIER:i CLOSE_BRACKET:cb SEMICOLON:s
@@ -471,9 +507,12 @@ var_list ::=  assigment_type:at COMMA var_list:vl
 ;
         
 structs ::= struct_decl OPEN_KEY:ok stmts:s CLOSE_KEY:ck
+           | struct_decl OPEN_KEY:ok case_fin:cf stmts:s CLOSE_KEY:ck
+           | struct_decl OPEN_KEY:ok case_fin:cf CLOSE_KEY:ck
            |switch_sent:ss 
            |if_sent:is
-;            
+;
+            
 struct_decl ::= struct_type:st OPEN_BRACKET:ob condition_list:c CLOSE_BRACKET:cb
             | struct_type:st OPEN_BRACKET:ob condition_for:cf CLOSE_BRACKET:cb 
 ;
