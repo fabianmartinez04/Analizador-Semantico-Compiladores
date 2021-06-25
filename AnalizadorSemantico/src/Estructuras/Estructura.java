@@ -5,6 +5,8 @@
  */
 package Estructuras;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author liset
@@ -57,5 +59,14 @@ public class Estructura {
 
     }
     
+     
+    public String[] getData() {
+        String[] data = new String[4];
+        data[0] = String.valueOf(this.linea);
+        data[1] = this.tipo;
+        data[2] = this.nombre;
+        data[3] = this.estructura;
+        return data;
+    }
     
 }

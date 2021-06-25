@@ -5,22 +5,25 @@
  */
 package Estructuras;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author liset
  */
 public class Variable extends Estructura {
+
     String dato;
     boolean bandera;
 
     public Variable(String tipo, String nombre, int linea, String dato) {
-        super(tipo,nombre,linea,"variable");
+        super(tipo, nombre, linea, "variable");
         this.dato = dato;
         this.bandera = true;
     }
 
     public Variable(String tipo, String nombre, int linea) {
-        super(tipo,nombre,linea,"variable");
+        super(tipo, nombre, linea, "variable");
         this.dato = "";
         this.bandera = false;
     }
@@ -56,17 +59,26 @@ public class Variable extends Estructura {
     public void setBandera(boolean bandera) {
         this.bandera = bandera;
     }
-    
-     public String imprimir(){
-         
-        String datos = super.imprimir()+
-                       "Dato: " + this.dato + "\n"+
-                       "Bandera: " + String.valueOf(bandera) + "\n";
-        
+
+    public String imprimir() {
+
+        String datos = super.imprimir()
+                + "Dato: " + this.dato + "\n"
+                + "Bandera: " + String.valueOf(bandera) + "\n";
+
         return datos;
 
     }
-    
-    
-    
+
+    @Override
+    public String[] getData() {
+        String[] data = new String[]{
+            super.getData()[0],
+            super.getData()[1],
+            super.getData()[2],
+            super.getData()[3],
+            this.dato, 
+            ""};
+        return data;
+    }
 }

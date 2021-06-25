@@ -48,5 +48,9 @@ public class Parametro {
 
     }
     
+    public String getData() {
+        return this.tipo + " " + this.nombre;     
+    }
+    
     
 }

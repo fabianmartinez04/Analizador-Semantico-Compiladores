@@ -5,13 +5,20 @@
         <group>
             <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/Parametro.java</file>
             <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/codigo/frmPrincipal.java</file>
-            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/SemanticStack.java</file>
-            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/codigo/Parser.cup</file>
             <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/TablaSimbolosSemantico.java</file>
+            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/Estructura.java</file>
+            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/Funcion.java</file>
+            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/codigo/TipoToken.java</file>
+            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/codigo/Scanner.flex</file>
+            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/Token.java</file>
+            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/codigo/Lexer.flex</file>
+            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/Variable.java</file>
+            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/codigo/Parser.cup</file>
             <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/codigo/Parser.java</file>
             <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/codigo/Principal.java</file>
             <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/SematicRegister/RS_TYPES.java</file>
-            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/Funcion.java</file>
+            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/TablaSimbolosScanner.java</file>
+            <file>file:/D:/Desktop/CI/Proyectos/Etapa%203/Analizador-Semantico-Compiladores/AnalizadorSemantico/src/Estructuras/SematicRegister/RS_DO.java</file>
         </group>
     </open-files>
 </project-private>

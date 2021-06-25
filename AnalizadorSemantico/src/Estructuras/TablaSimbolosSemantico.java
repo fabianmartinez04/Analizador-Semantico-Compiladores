@@ -97,6 +97,16 @@ public class TablaSimbolosSemantico {
         
     }
     
+    
+    public ArrayList<String[]> getSymbols() {
+        ArrayList<String[]> symbols = new ArrayList<>();
+       for(int index = 0; index <tabla.size(); index++){
+           symbols.add(this.tabla.get(llaves.get(index)).getData());
+       } 
+       return symbols;
+    }
+    
+    
     public Variable getVariable(String name){
 
         for(int i = 0 ; i<this.llaves.size();i++){
