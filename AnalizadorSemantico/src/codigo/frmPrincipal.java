@@ -130,6 +130,7 @@ public class frmPrincipal extends javax.swing.JFrame {
         jTextSintaxResult.setRows(5);
         jScrollPane4.setViewportView(jTextSintaxResult);
 
+        jTextSemanticError.setEditable(false);
         jTextSemanticError.setColumns(20);
         jTextSemanticError.setRows(5);
         jScrollPane5.setViewportView(jTextSemanticError);
