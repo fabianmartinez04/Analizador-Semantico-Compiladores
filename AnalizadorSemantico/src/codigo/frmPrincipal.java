@@ -61,7 +61,7 @@ public class frmPrincipal extends javax.swing.JFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         jTextSintaxResult = new javax.swing.JTextArea();
         jScrollPane5 = new javax.swing.JScrollPane();
-        jTextSemanticError = new javax.swing.JTextField();
+        jTextSemanticError = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabelLexer = new javax.swing.JLabel();
@@ -130,13 +130,8 @@ public class frmPrincipal extends javax.swing.JFrame {
         jTextSintaxResult.setRows(5);
         jScrollPane4.setViewportView(jTextSintaxResult);
 
-        jTextSemanticError.setEditable(false);
-        jTextSemanticError.setBackground(new java.awt.Color(255, 255, 255));
-        jTextSemanticError.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextSemanticErrorActionPerformed(evt);
-            }
-        });
+        jTextSemanticError.setColumns(20);
+        jTextSemanticError.setRows(5);
         jScrollPane5.setViewportView(jTextSemanticError);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
@@ -381,10 +376,6 @@ public class frmPrincipal extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnAnalizarActionPerformed
 
-    private void jTextSemanticErrorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextSemanticErrorActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextSemanticErrorActionPerformed
-
     /**
      * @param args the command line arguments
      */
@@ -434,7 +425,7 @@ public class frmPrincipal extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTable jSymbol;
-    private javax.swing.JTextField jTextSemanticError;
+    private javax.swing.JTextArea jTextSemanticError;
     private javax.swing.JTextArea jTextSintaxResult;
     private javax.swing.JLabel jlTitle;
     private javax.swing.JTable jtTokens;
