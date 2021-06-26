@@ -168,6 +168,55 @@ action code
         stack.push(register);    
     
     }
+
+    public void updateSymbol() {
+        RS var = stack.pop();
+        RS value = stack.pop();
+
+        if(table.validateEstructura(var.value)) {
+           Variable symbolVar = table.getVariable(var.value);
+           if (symbolVar != null) {
+            sectionCode += "\tmov \trax," + value.value + "\n";
+            sectionCode += "\tmov \t[" + symbolVar.getNombre() + "],rax \n";
+            table.updateVariable(symbolVar.getNombre(),value.value);
+           } else {
+            addSemanticError(var.s,"No se puede asignar el valor a una función");
+           }
+           
+        } else {
+            addSemanticError(var.s,"la variable no se encuentra declarada");
+        }
+    }
+
+    public void incDec() {
+        RS variable = stack.pop();
+        RS operator = stack.pop();
+        if (variable.id == RS_TYPES.OPERATOR) {
+            RS aux = variable;
+            operator = variable;
+            variable = aux;
+        }
+        if(table.validateEstructura(variable.value)) {
+           Variable symbolVar = table.getVariable(variable.value);
+           if (symbolVar != null) {
+                sectionCode += "\tmov \trax,[" + variable.value + "]\n";
+                if (operator.value.equals("++")) {
+                    sectionCode += "\tinc \trax \n";
+                    table.updateVariable(symbolVar.getNombre(),String.valueOf(Integer.parseInt(symbolVar.getDato())+1));
+                } else {
+                    sectionCode += "\tdec \trax \n";
+                    table.updateVariable(symbolVar.getNombre(),String.valueOf(Integer.parseInt(symbolVar.getDato())-1));
+                }
+                sectionCode += "\tmov \t[" + variable.value + "],rax\n";
+            } else {
+            addSemanticError(variable.s,"No se puede asignar el valor a una función");
+           }
+           
+        } else {
+            addSemanticError(variable.s,"la variable no se encuentra declarada");
+        }
+    }
+
     
     public void insertarTS(){
        
@@ -180,7 +229,6 @@ action code
                     RS register = stack.pop();
                 
                     if(!table.validateEstructura(register.value)){
-                 
                         Estructura variable = new Variable(type,register.value,register.s.right,registerValor.value);
                         table.addEstructura(register.value,variable);
                         sectionData = sectionData + "\t " + register.value + ": dd \t" + registerValor.value + " \n";
@@ -194,14 +242,25 @@ action code
                     RS register = stack.pop();
                 
                     if(!table.validateEstructura(register.value)){
-                        if (register.s != null) {
-                            Estructura variable = new Variable(type,register.value,register.s.right);
-                            table.addEstructura(register.value,variable);
-                        } else {
-                            Estructura variable = new Variable(type,"",-1,register.value);
-                            table.addEstructura(register.value,variable);
+                        if (type.equals("int")) {
+                            if (register.s != null) {
+                                Estructura variable = new Variable(type,register.value,register.s.right,"0");
+                                table.addEstructura(register.value,variable);
+                            } else {
+                                Estructura variable = new Variable(type,register.value,-1,"0");
+                                table.addEstructura(register.value,variable);
+                            }
+                            sectionData = sectionData + "\t " + register.value + ": dd \t" + 0 + " \n";
+                        } else if (type.equals("char") || type.equals("char")) {
+                            if (register.s != null) {
+                                Estructura variable = new Variable(type,register.value,register.s.right,"");
+                                table.addEstructura(register.value,variable);
+                            } else {
+                                Estructura variable = new Variable(type,register.value,-1,"");
+                                table.addEstructura(register.value,variable);
+                            }
+                            sectionData = sectionData + "\t " + register.value + ": dd \t" + "\"\"" + " \n";
                         }
-                        
                     }
                     else{
                         addSemanticError(register.s,"la variable ya se encuentra declarada");
@@ -233,8 +292,6 @@ action code
             Estructura funcion = new Funcion(type.value,id.value,p,id.s.right);
             table.addEstructura(id.value,funcion);
         }
-        
-       
     }
 
 
@@ -311,6 +368,27 @@ action code
         }
         stack.push(register);
    
+    }
+
+    public void evalBoolean() {
+        RS register2 = stack.pop();
+        RS operator = stack.pop();
+        RS register1 = stack.pop();
+        NasmRegister r1 = nasmRegisters.getFreeRegister();
+        NasmRegister r2 = nasmRegisters.getFreeRegister();
+        if (register1.id == RS_TYPES.ID) {
+            sectionCode += "\tmov \t" + r1.name + ",[" + register1.value +"]" + "\n"; 
+        } else {
+            sectionCode += "\tmov \t" + r1.name + "," + register1.value + "\n";
+        }
+        if (register2.id == RS_TYPES.ID) {
+           sectionCode += "\tmov \t" + r2.name + ",[" + register2.value +"]" + "\n"; 
+        } else {
+           sectionCode += "\tmov \t" + r2.name + "," + register2.value + "\n";
+        }
+        sectionCode += "\tcmp \t" + r1.name + "," + r2.name + "\n";
+        nasmRegisters.setRegisterState(r1.name,true);
+        nasmRegisters.setRegisterState(r2.name,true);
     }
 
 
@@ -406,6 +484,7 @@ action code
 
 
 
+
 :}
 
 /*Synmbol Terminal and No-terminal*/
@@ -425,7 +504,7 @@ non terminal String literal, declaration, var_func_decl_list, stmts, var_func_de
 non terminal String structs, struct_decl, struct_type, condition_for, condition, var, comparator, change_var,if,else;
 non terminal String switch_sent,mult_case_stmt, case_stmt, case_fin, return,if_sent,if_inst,else_inst, asign_equal,read_func,write_func;
 non terminal String equals, incr_decr, math_expr, expr_uni, expr_math, expr,symbol,case_default,cases_switch,stmts_switch,assigment_type,call_fun ,var_list;
-non terminal String first_part_function, fisrt_part_function2;
+non terminal String first_part_function, fisrt_part_function2, var_assig, identifier;
 
 start with program;
 
@@ -510,8 +589,8 @@ stmts ::= const_decl stmts:s
         | structs:st 
         | asign_equal:ae SEMICOLON:sc stmts:sm
         | asign_equal:ae SEMICOLON:sc
-        | IDENTIFIER:i EQUAL assigment_type:at SEMICOLON stmts:sm
-        | IDENTIFIER:i EQUAL assigment_type:at SEMICOLON
+        | var_assig stmts:sm
+        | var_assig
         | MUL:m IDENTIFIER:i EQUAL assigment_type:at SEMICOLON stmts:sm
         | MUL:m IDENTIFIER:i EQUAL assigment_type:at SEMICOLON
         | incr_decr SEMICOLON:sc stmts:sm
@@ -527,12 +606,17 @@ stmts ::= const_decl stmts:s
         | return:r stmts
         | return:r
 
-;   
+;
+var_assig ::= identifier EQUAL assigment_type:at SEMICOLON 
+            {: updateSymbol(); :}
+;
+identifier ::= IDENTIFIER:i  {: recuerdaId(i,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3))); :}
+;
 stmts_switch ::= structs:st stmts_switch:sw
                 | structs:st 
                 | asign_equal:ae SEMICOLON:sc stmts_switch:sw 
                 | asign_equal:ae SEMICOLON:sc
-                | IDENTIFIER:i EQUAL assigment_type:at SEMICOLON stmts_switch:sw
+                | IDENTIFIER:i EQUAL assigment_type:at SEMICOLON stmts_switch:sw {}
                 | IDENTIFIER:i EQUAL assigment_type:at SEMICOLON
                 | MUL:m IDENTIFIER:i EQUAL assigment_type:at SEMICOLON stmts_switch:sw
                 | MUL:m IDENTIFIER:i EQUAL assigment_type:at SEMICOLON
@@ -612,35 +696,41 @@ return ::= I_RETURN:r var:v SEMICOLON:s
         | I_RETURN:r SEMICOLON:s 
 ;
 
-change_var ::= INCR:i
-            |DECR:d
+change_var ::= INCR:i {: recuerdaOperador(i, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+            |DECR:d {: recuerdaOperador(d, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
 ;
 condition_list ::= condition comparator condition_list 
                 |condition
 ;
-condition ::=  var:v comparator:c var:v1 
+condition ::=  var:v comparator:c var:v1 {: evalBoolean(); :}
             | OPEN_BRACKET var:v comparator:c var:v1 CLOSE_BRACKET
             | OPEN_BRACKET var:v CLOSE_BRACKET
 
 ;
 condition_for ::= var_type:vt var_decl:vd SEMICOLON:sc condition:c SEMICOLON:sc1 incr_decr
 ;
-incr_decr ::= IDENTIFIER:i change_var:cv
-            | change_var:cv IDENTIFIER:i
+incr_decr ::= IDENTIFIER:i change_var:cv 
+            {: recuerdaId(i, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1))); 
+               incDec(); 
+            :}
+            | change_var:cv IDENTIFIER:i 
+            {: recuerdaId(i, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); 
+               incDec();
+            :}
 ;
-comparator ::= EQUAL_TO:et 
-             |GREATER_EQUAL:ge
-             |LESS:l
-             |LESS_EQUAL:le
-             |GREATER:gr
-             |NOT_EQUAL:ne
-             |LOGICAL_AND
+comparator ::= EQUAL_TO:et {: recuerdaOperador(et, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+             |GREATER_EQUAL:ge {: recuerdaOperador(ge, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+             |LESS:l {: recuerdaOperador(l, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+             |LESS_EQUAL:le {: recuerdaOperador(le, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+             |GREATER:gr {: recuerdaOperador(gr, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+             |NOT_EQUAL:ne {: recuerdaOperador(ne, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+             |LOGICAL_AND 
              |LOGICAL_OR
 
 ;
-var ::= NUMBER:n
-    | IDENTIFIER:i
-    |LOGICAL_NOT:ln IDENTIFIER:i
+var ::= NUMBER:n   {: recuerdaConst(n,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | IDENTIFIER:i {: recuerdaId(i, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | LOGICAL_NOT:ln IDENTIFIER:i
 ;
 asign_equal ::= IDENTIFIER:i equals:e var
 ;
@@ -658,15 +748,15 @@ expr_math ::= OPEN_BRACKET:o expr_math:em CLOSE_BRACKET:c expr_math:em1
 ;
 
 expr_uni ::= ADD:a literal:n expr_uni:eu {: recuerdaOperador(a,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
-    | ADD:a literal:n {: recuerdaOperador(a,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | ADD:a literal:n {: recuerdaOperador(a,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1))); :}
     | SUB:s literal:n expr_uni:eu {: recuerdaOperador(s,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
-    | SUB:s literal:n {: recuerdaOperador(s,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | SUB:s literal:n {: recuerdaOperador(s,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1))); :}
     | MUL:m literal:n expr_uni:eu {: recuerdaOperador(m,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
-    | MUL:m literal:n {: recuerdaOperador(m,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | MUL:m literal:n {: recuerdaOperador(m,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1))); :}
     | DIV:d literal:n expr_uni:eu {: recuerdaOperador(d,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
-    | DIV:d literal:n {: recuerdaOperador(d,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | DIV:d literal:n {: recuerdaOperador(d,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1))); :}
     | MOD:d literal:n expr_uni:eu {: recuerdaOperador(d,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
-    | MOD:d literal:n {: recuerdaOperador(d,((java_cup.runtime.Symbol)CUP$Parser$stack.peek())); :}
+    | MOD:d literal:n {: recuerdaOperador(d,((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1))); :}
 ;
 
 symbol ::= ADD:a

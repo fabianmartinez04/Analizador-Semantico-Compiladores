@@ -340,6 +340,7 @@ public class frmPrincipal extends javax.swing.JFrame {
                 }
                 // show semantic error
                 // if list is empty show a success msg
+                jTextSemanticError.setText("");
                 if (parser.action_obj.semanticList.isEmpty()) {
                     jTextSemanticError.setForeground(Color.green);
                     jTextSemanticError.setText("Análisis semántico existoso");
