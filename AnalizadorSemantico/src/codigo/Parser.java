@@ -1004,8 +1004,8 @@ class CUP$Parser$actions {
     }
 
     public void updateSymbol() {
-        RS var = stack.pop();
         RS value = stack.pop();
+        RS var = stack.pop();
 
         if(table.validateEstructura(var.value)) {
            Variable symbolVar = table.getVariable(var.value);
